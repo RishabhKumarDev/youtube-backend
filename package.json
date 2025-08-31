@@ -1,0 +1,17 @@
+{
+  "name": "youtube-backend",
+  "version": "1.0.0",
+  "description": "A in-depth, production grade Backend replica of youtube;",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "backend",
+    "youtube",
+    "project",
+    "chai"
+  ],
+  "author": "blue",
+  "license": "ISC"
+}
