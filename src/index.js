@@ -9,7 +9,7 @@ dotenv.config({path:"./.env"});
   try {
     await connectDB();
     app.listen(process.env.PORT, (req, res) => {
-      console.log("App is listening to", process.env.PORT);
+      console.log("App is listening to", `http://localhost:${process.env.PORT}`);
     });
   } catch (error) {
     console.log("Error in Connection", error);
