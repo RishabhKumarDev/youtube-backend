@@ -16,7 +16,7 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(400, "All Fileds are Compulsory");
   }
   // check if user exist
-  const userExist = User.findOne({ $or: [{ username }, { email }] });
+  const userExist = await User.findOne({ $or: [{ username }, { email }] });
   if (userExist) {
     throw new ApiError(409, "User Already Exist");
   }
@@ -26,14 +26,24 @@ const registerUser = asyncHandler(async (req, res) => {
   // file is uploaded locally;
   // get the path of the file
   const avatarLocalPath = req.files?.avatar[0]?.path;
-  const coverImageLocalPath = req.files?.coverImage[0]?.path;
+  // const coverImageLocalPath = req.files?.coverImage[0]?.path;
 
+  let coverImageLocalPath;
+  if (
+    req.files &&
+    Array.isArray(req.files.coverImage) &&
+    req.files.coverImage > 0
+  ) {
+    coverImageLocalPath = req.files.avatar[0].path;
+  }
   // conforming if file path even exist
   if (!avatarLocalPath) throw new ApiError(400, "Avatar Image is Required!");
 
   // now upload those files in cloudnary;
   const avatar = await uploadOnCloudinary(avatarLocalPath);
   const coverImage = await uploadOnCloudinary(coverImageLocalPath);
+
+  console.log(avatar);
 
   // again check if we have avatar as it's a required field and DB will crash if it's missing
   if (!avatar) throw new ApiError(400, "Avatar Image is Required");
