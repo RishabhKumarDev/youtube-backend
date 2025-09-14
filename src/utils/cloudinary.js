@@ -15,8 +15,8 @@ const uploadOnCloudinary = async (localFilePath) => {
     });
     console.log(result);
     return result;
-  } catch (error) {
-    fs.lutimesSync(localFilePath);
+  } catch (error) { // delete the file from local as the upload failed;
+    fs.unlinkSync(localFilePath);
     return null;
   }
 };
