@@ -25,16 +25,17 @@ const registerUser = asyncHandler(async (req, res) => {
   // file is sent to the multer as a middleware and now req.files has path of the uploaded files;
   // file is uploaded locally;
   // get the path of the file
-  const avatarLocalPath = req.files?.avatar[0]?.path;
+  console.log(req.files);
+  const avatarLocalPath = req.files?.avatar && req.files.avatar.length > 0? req.files.avatar[0].path : null
   // const coverImageLocalPath = req.files?.coverImage[0]?.path;
 
   let coverImageLocalPath;
   if (
     req.files &&
     Array.isArray(req.files.coverImage) &&
-    req.files.coverImage > 0
+    req.files.coverImage.length > 0
   ) {
-    coverImageLocalPath = req.files.avatar[0].path;
+    coverImageLocalPath = req.files.coverImage[0].path;
   }
   // conforming if file path even exist
   if (!avatarLocalPath) throw new ApiError(400, "Avatar Image is Required!");
@@ -76,16 +77,16 @@ const registerUser = asyncHandler(async (req, res) => {
 const generateAccessTokenAndRefreshToken = async (userId) => {
   try {
     const user = await User.findById(userId);
-
+     
     const accessToken = user.generateAccessToken();
     const refreshToken = user.generateRefreshToken();
-
+  
     user.refreshToken = refreshToken;
     await user.save({ validateBeforeSave: false });
 
     return { accessToken, refreshToken };
   } catch (error) {
-    throw new ApiError(500, "Couldn't generate access token and refresh token");
+    throw new ApiError(500,error?.message);
   }
 };
 const loginUser = asyncHandler(async (req, res) => {
@@ -99,20 +100,19 @@ const loginUser = asyncHandler(async (req, res) => {
 
   const { username, email, password } = req.body;
 
-  if (!username || !email || !password) {
-    return new ApiError(400, "Username OR Email is required!!!");
+  if ((!username && !email) || !password) {
+    throw new ApiError(400, "Username OR Email is required!!!");
   }
 
   let user = await User.findOne({ $or: [{ email }, { username }] });
 
   if (!user) {
-    return new ApiError(404, "User Don't Exist in the DB");
+    throw new ApiError(404, "User Don't Exist in the DB");
   }
 
   let isPasswordVaild = await user.isPasswordCorrect(password);
-
   if (!isPasswordVaild) {
-    return new ApiError(
+    throw new ApiError(
       401,
       "Wrong Password, Please Enter a correct password!!!"
     );
