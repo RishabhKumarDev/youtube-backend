@@ -213,4 +213,54 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
       )
     );
 });
-export { registerUser, loginUser, logoutUser, refreshAccessToken };
+
+const changeCurrentPassword = asyncHandler(async (req, res) => {
+  let { oldPassword, newPassword } = req.body;
+  if (!oldPassword || !newPassword)
+    throw new ApiError(400, "Password Feild Can't Be Empty!");
+  if (oldPassword === newPassword)
+    throw new ApiError(400, "New Password can't be same as old");
+
+  let user = await User.findById(req.user._id);
+
+  let isPasswordCorrect = user.isPasswordCorrect(oldPassword);
+  if (!isPasswordCorrect) throw new ApiError(400, "Wrong Password Entered");
+
+  user.password = newPassword;
+  await user.save({ validateBeforeSave: false });
+  res.status(200).json(new ApiResponse(200, {}, "password changed Successful"));
+});
+const getCurrentUser = asyncHandler(async (req, res) => {
+  res
+    .status(200)
+    .json(new ApiResponse(200, req.user, "current user sent successfully"));
+});
+const updateAccountDetails = asyncHandler(async (req, res) => {
+  let { fullName, email } = req.body;
+  if (!fullName || !email) throw new ApiError(400, "Both Feilds are requird");
+
+  const user = await User.findByIdAndUpdate(
+    req.body._id,
+    {
+      $set: {
+        fullName,
+        email,
+      },
+    },
+    { new: true }
+  ).select("-password -refreshToken");
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, user, "Details Updated Successfully"));
+});
+
+export {
+  registerUser,
+  loginUser,
+  logoutUser,
+  refreshAccessToken,
+  changeCurrentPassword,
+  getCurrentUser,
+  updateAccountDetails,
+};
