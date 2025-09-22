@@ -26,7 +26,7 @@ const registerUser = asyncHandler(async (req, res) => {
   // file is sent to the multer as a middleware and now req.files has path of the uploaded files;
   // file is uploaded locally;
   // get the path of the file
-  console.log(req.files);
+  // console.log(req.files);
   const avatarLocalPath =
     req.files?.avatar && req.files.avatar.length > 0
       ? req.files.avatar[0].path
@@ -230,17 +230,19 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
   await user.save({ validateBeforeSave: false });
   res.status(200).json(new ApiResponse(200, {}, "password changed Successful"));
 });
+
 const getCurrentUser = asyncHandler(async (req, res) => {
   res
     .status(200)
     .json(new ApiResponse(200, req.user, "current user sent successfully"));
 });
+
 const updateAccountDetails = asyncHandler(async (req, res) => {
   let { fullName, email } = req.body;
   if (!fullName || !email) throw new ApiError(400, "Both Feilds are requird");
 
   const user = await User.findByIdAndUpdate(
-    req.body._id,
+    req.user?._id,
     {
       $set: {
         fullName,
@@ -253,6 +255,44 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
   res
     .status(200)
     .json(new ApiResponse(200, user, "Details Updated Successfully"));
+});
+
+const updateUserAvatar = asyncHandler(async (req, res) => {
+  let avatarLocalPath = req.file?.path;
+  if (!avatarLocalPath) {
+    throw new ApiError(400, "Avatar Image can't be empty");
+  }
+  const avatar = await uploadOnCloudinary(avatarLocalPath);
+  if(!avatar.url){
+    throw new ApiError(400, "Failed to upload avatar to Cloudinary");
+  }
+  
+  const user = await User.findByIdAndUpdate(req.user?._id,{
+    $set:{avatar: avatar.url}
+  },{new:true}).select("-password -refreshToken")
+
+  res.status(200).json(new ApiResponse(200, user, "Avatar Image Updated Successfully"))
+
+});
+
+
+const updateUserCoverImage = asyncHandler(async (req, res) => {
+  let coverImageLocalPath = req.file?.path;
+
+  if (!coverImageLocalPath) {
+    throw new ApiError(400, "Cover Image can't be empty");
+  }
+  const coverImage = await uploadOnCloudinary(coverImageLocalPath);
+  if(!coverImage.url){
+    throw new ApiError(400, "Failed to upload avatar to Cloudinary");
+  }
+  
+  const user = await User.findByIdAndUpdate(req.user?._id,{
+    $set:{coverImage: coverImage.url}
+  },{new:true}).select("-password -refreshToken")
+
+  res.status(200).json(new ApiResponse(200, user, "Cover Image Updated Successfully"))
+
 });
 
 export {
