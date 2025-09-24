@@ -4,6 +4,7 @@ import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 
 const registerUser = asyncHandler(async (req, res) => {
   // get user data
@@ -304,7 +305,7 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, user, "Cover Image Updated Successfully"));
 });
 
-const getUserChannelProfile = asyncHandler(async (req, res) => {
+const getChannelProfile = asyncHandler(async (req, res) => {
   let { username } = req.params;
   if (!username?.trim()) {
     throw new ApiError(401, "Username is missing");
@@ -360,7 +361,64 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
   }
   res
     .status(200)
-    .json(new ApiResponse(200, channel[0], "User Channel featched Successfully"));
+    .json(
+      new ApiResponse(200, channel[0], "User Channel featched Successfully")
+    );
+});
+
+const getUserWatchHistory = asyncHandler(async (req, res) => {
+  let userId = req.user?._id;
+  if (!userId) {
+    throw new ApiError(400, "User Id is Undifined");
+  }
+
+  const user =await User.aggregate([
+    { $match: { _id: mongoose.Types.ObjectId(userId) } },
+    {
+      $lookup: {
+        from: "videos",
+        localField: "watchHistory",
+        foreignField: "_id",
+        as: "watchHistory",
+        pipeline: [
+          {
+            $lookup: {
+              from: "users",
+              localField: "owner",
+              foreignField: "_id",
+              as: "owner",
+              pipeline: [
+                {
+                  $project: {
+                    fullName: 1,
+                    username: 1,
+                    avatar: 1,
+                  },
+                },
+              ],
+            },
+          },
+          {
+            $addFields: {
+              owner: {
+                $first: "$owner",
+              },
+            },
+          },
+        ],
+      },
+    },
+  ]);
+
+  res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        user[0].watchHistory,
+        "Watch History Featched Successfully!!!"
+      )
+    );
 });
 
 export {
@@ -373,5 +431,6 @@ export {
   updateAccountDetails,
   updateUserAvatar,
   updateUserCoverImage,
-  getUserChannelProfile
+  getChannelProfile,
+  getUserWatchHistory
 };
