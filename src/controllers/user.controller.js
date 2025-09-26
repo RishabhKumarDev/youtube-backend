@@ -223,12 +223,12 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
     throw new ApiError(400, "New Password can't be same as old");
 
   let user = await User.findById(req.user._id);
-
-  let isPasswordCorrect = user.isPasswordCorrect(oldPassword);
-  if (!isPasswordCorrect) throw new ApiError(400, "Wrong Password Entered");
-
+  let isPasswordCorrect =await user.isPasswordCorrect(oldPassword);
+  if (!isPasswordCorrect) {
+    throw new ApiError(400, "Wrong Password Entered");
+  }
   user.password = newPassword;
-  await user.save({ validateBeforeSave: false });
+  let userN = await user.save({ validateBeforeSave: false });
   res.status(200).json(new ApiResponse(200, {}, "password changed Successful"));
 });
 
@@ -372,8 +372,8 @@ const getUserWatchHistory = asyncHandler(async (req, res) => {
     throw new ApiError(400, "User Id is Undifined");
   }
 
-  const user =await User.aggregate([
-    { $match: { _id: mongoose.Types.ObjectId(userId) } },
+  const user = await User.aggregate([
+    { $match: { _id:new mongoose.Types.ObjectId(userId) } },
     {
       $lookup: {
         from: "videos",
@@ -432,5 +432,5 @@ export {
   updateUserAvatar,
   updateUserCoverImage,
   getChannelProfile,
-  getUserWatchHistory
+  getUserWatchHistory,
 };
