@@ -18,12 +18,13 @@ app.use(cookieParser());
 //routes
 // routes import
 import userRouter from './routes/user.routes.js';
+import commentRouter from './routes/comment.routes.js';
 
 //routes Declaration 
 app.get("/",(req,res)=>{
     res.send("hii");
 })
 app.use("/api/v1/users", userRouter);
-
+app.use("/api/v1/comments", commentRouter);
 
 export default app;
