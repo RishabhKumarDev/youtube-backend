@@ -7,7 +7,7 @@ import {
 } from "../controllers/comment.controller.js";
 import { verifyAccessToken } from "../middlewares/auth.middlerware.js";
 
-const router = Router();
+const router = Router({mergeParams:true});
 
 router.use(verifyAccessToken);
 
