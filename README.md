@@ -41,3 +41,15 @@ Instructions for setting up the project locally will be added soon.
 
 ## License
 [MIT](LICENSE)  
+
+
+## controller pattern
+
+| Step | Action         | Example                                |
+| ---- | -------------- | -------------------------------------- |
+| 1    | Extract        | `const { id } = req.params`            |
+| 2    | Validate       | `if (!id) return res.status(400)`      |
+| 3    | Query          | `const post = await Post.findById(id)` |
+| 4    | Handle Missing | `if (!post) return res.status(404)`    |
+| 5    | Respond        | `res.status(200).json(post)`           |
+| 6    | Catch Errors   | `next(error)`                          |
