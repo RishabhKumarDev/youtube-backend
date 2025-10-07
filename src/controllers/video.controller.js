@@ -1,16 +1,16 @@
-const getAllVideos = () => {};
+import asyncHandler from "../utils/asyncHandler";
 
-const publishVideo = () => {
-    
-};
+const getAllVideos = asyncHandler(async (req, res) => {});
 
-const getVideoById = () => {};
+const publishVideo =asyncHandler(async (req, res) => {});
 
-const deleteVideo = () => {};
+const getVideoById = asyncHandler(async (req, res) => {});
 
-const updateVideo = () => {};
+const deleteVideo =asyncHandler(async (req, res) => {});
 
-const togglePublishStatus = () => {};
+const updateVideo = asyncHandler(async (req, res) => {});
+
+const togglePublishStatus = asyncHandler(async (req, res) => {});
 
 export {
   getAllVideos,
